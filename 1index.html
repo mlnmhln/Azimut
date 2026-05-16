@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZIMUT Room Service — Панель сотрудника</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:           #FAFAFA;
+    --bg-card:      #FFFFFF;
+    --bg-elev:      #F2EEEE;
+    --red:          #DC1827;
+    --red-bright:   #EF3340;
+    --red-soft:     rgba(220, 24, 39, 0.08);
+    --text:         #000000;
+    --text-mute:    #6B7280;
+    --text-dim:     #9CA3AF;
+    --border:       #E8E0E0;
+    --green:        #2E8B57;
+    --green-soft:   rgba(46, 139, 87, 0.10);
+    --orange:       #E89B5C;
+    --orange-soft:  rgba(232, 155, 92, 0.12);
+    --blue:         #3B82F6;
+    --blue-soft:    rgba(59, 130, 246, 0.10);
+    --gray:         #9CA3AF;
+    --gray-soft:    rgba(156, 163, 175, 0.10);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Montserrat', -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .topbar {
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .topbar-brand .logo {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--red);
+  }
+  .topbar-brand .sep { color: var(--text-dim); }
+  .topbar-brand .panel-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.04em;
+  }
+  .topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-mute);
+  }
+  .topbar-user .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--red-soft);
+    color: var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-soft);
+    color: var(--green);
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 14px;
+  }
+  .live-indicator .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 18px 28px 0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .stat-card .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+  .stat-card .stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .stat-card.new .stat-icon { background: var(--red-soft); color: var(--red); }
+  .stat-card.cook .stat-icon { background: var(--orange-soft); color: var(--orange); }
+  .stat-card.done .stat-icon { background: var(--green-soft); color: var(--green); }
+  .stat-card.cash .stat-icon { background: var(--blue-soft); color: var(--blue); }
+  .stat-card.new .stat-value { color: var(--red); }
+
+  /* Filter tabs */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    padding: 18px 28px 14px;
+    max-width: 1400px;
+    margin: 0 auto;
+    overflow-x: auto;
+  }
+  .tab {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 8px 18px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .tab:hover { background: var(--bg-elev); }
+  .tab.active {
+    background: var(--red);
+    color: #FFFFFF;
+    border-color: var(--red);
+  }
+  .tab .count {
+    display: inline-block;
+    margin-left: 6px;
+    background: rgba(0, 0, 0, 0.08);
+    color: inherit;
+    padding: 1px 7px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .tab.active .count { background: rgba(255, 255, 255, 0.25); color: #FFFFFF; }
+
+  /* Orders grid */
+  .orders {
+    padding: 0 28px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 14px;
+  }
+  .empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-mute);
+  }
+  .empty h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .empty p { font-size: 14px; }
+  .empty-icon {
+    font-size: 56px;
+    opacity: 0.3;
+    margin-bottom: 14px;
+  }
+
+  .order-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .order-card.new {
+    border-color: var(--red);
+    box-shadow: 0 4px 24px rgba(220, 24, 39, 0.10);
+    animation: newOrder 1.2s ease-out;
+  }
+  @keyframes newOrder {
+    0% { transform: scale(0.98); box-shadow: 0 0 0 4px rgba(220, 24, 39, 0.20); }
+    50% { box-shadow: 0 0 0 8px rgba(220, 24, 39, 0.10); }
+    100% { transform: scale(1); box-shadow: 0 4px 24px rgba(220, 24, 39, 0.10); }
+  }
+
+  .order-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .order-id-block { display: flex; flex-direction: column; gap: 2px; }
+  .order-id {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .order-ts {
+    font-size: 11px;
+    color: var(--text-mute);
+    font-weight: 500;
+  }
+  .status-pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 100px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .status-pill.new      { background: var(--red-soft); color: var(--red); }
+  .status-pill.cooking  { background: var(--orange-soft); color: var(--orange); }
+  .status-pill.delivering { background: var(--blue-soft); color: var(--blue); }
+  .status-pill.delivered { background: var(--green-soft); color: var(--green); }
+  .status-pill.cancelled { background: var(--gray-soft); color: var(--gray); }
+
+  .order-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .order-meta .cell {
+    background: var(--bg-elev);
+    padding: 8px 12px;
+    border-radius: 10px;
+  }
+  .order-meta .lbl {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .order-meta .val {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .order-items {
+    margin-bottom: 12px;
+  }
+  .order-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 13px;
+  }
+  .order-item-row:last-child { border-bottom: none; }
+  .order-item-name {
+    color: var(--text);
+    font-weight: 500;
+    flex: 1;
+    margin-right: 10px;
+  }
+  .order-item-qty {
+    color: var(--text-mute);
+    font-weight: 600;
+    margin-right: 10px;
+    white-space: nowrap;
+  }
+  .order-item-price {
+    color: var(--red);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .order-comment {
+    background: #FFF8EC;
+    border-left: 3px solid var(--orange);
+    padding: 8px 12px;
+    border-radius: 0 8px 8px 0;
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+  .order-comment .lbl {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--orange);
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+
+  .order-flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .flag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    background: var(--bg-elev);
+    color: var(--text);
+  }
+  .flag.leave { background: rgba(232, 155, 92, 0.18); color: var(--orange); }
+  .flag.online { background: rgba(46, 139, 87, 0.18); color: var(--green); }
+
+  .order-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .order-total .lbl {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-mute);
+  }
+  .order-total .val {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--red);
+  }
+
+  .order-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-action {
+    flex: 1;
+    background: var(--red);
+    color: #FFFFFF;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .btn-action:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220, 24, 39, 0.30); }
+  .btn-action.next-orange { background: var(--orange); }
+  .btn-action.next-orange:hover { box-shadow: 0 4px 12px rgba(232, 155, 92, 0.40); }
+  .btn-action.next-blue { background: var(--blue); }
+  .btn-action.next-blue:hover { box-shadow: 0 4px 12px rgba(59, 130, 246, 0.30); }
+  .btn-action.next-green { background: var(--green); }
+  .btn-action.next-green:hover { box-shadow: 0 4px 12px rgba(46, 139, 87, 0.30); }
+  .btn-action.cancel {
+    flex: 0 0 auto;
+    background: transparent;
+    color: var(--text-mute);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+  }
+  .btn-action.cancel:hover {
+    background: var(--bg-elev);
+    color: var(--text);
+    transform: none;
+    box-shadow: none;
+  }
+
+  .order-fb {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--green-soft);
+    border-radius: 10px;
+    font-size: 12px;
+  }
+  .order-fb .fb-head {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .order-fb .fb-ratings {
+    display: flex;
+    gap: 10px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .order-fb .fb-ratings .item { display: flex; align-items: center; gap: 3px; }
+  .order-fb .fb-comment {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.4;
+    font-style: italic;
+  }
+
+  /* Demo notice */
+  .demo-notice {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    background: var(--red-soft);
+    border: 1px solid rgba(220, 24, 39, 0.30);
+    color: var(--red);
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    z-index: 1000;
+    pointer-events: none;
+  }
+
+  /* Empty state — Add demo button */
+  .demo-controls {
+    text-align: center;
+    margin-top: 16px;
+  }
+  .demo-btn {
+    background: var(--bg-card);
+    border: 1px dashed var(--border);
+    color: var(--text-mute);
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 4px;
+  }
+  .demo-btn:hover {
+    background: var(--bg-elev);
+    color: var(--text);
+  }
+
+  @media (max-width: 900px) {
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+    .stat-card .stat-value { font-size: 22px; }
+    .stat-card .stat-icon { width: 36px; height: 36px; font-size: 16px; }
+    .topbar { padding: 12px 16px; }
+    .stats-bar, .tabs, .orders { padding-left: 16px; padding-right: 16px; }
+    .orders { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="logo">AZIMUT</div>
+    <span class="sep">·</span>
+    <div class="panel-name">Панель рум-сервиса · Олимпик Москва</div>
+  </div>
+  <div class="topbar-user">
+    <div class="live-indicator">
+      <span class="dot"></span>
+      <span>В сети</span>
+    </div>
+    <div class="avatar">КС</div>
+    <span>Кухонная служба</span>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card new">
+    <div>
+      <div class="stat-label">Новых</div>
+      <div class="stat-value" id="statNew">0</div>
+    </div>
+    <div class="stat-icon">🔔</div>
+  </div>
+  <div class="stat-card cook">
+    <div>
+      <div class="stat-label">В работе</div>
+      <div class="stat-value" id="statCook">0</div>
+    </div>
+    <div class="stat-icon">👨‍🍳</div>
+  </div>
+  <div class="stat-card done">
+    <div>
+      <div class="stat-label">Доставлено сегодня</div>
+      <div class="stat-value" id="statDone">0</div>
+    </div>
+    <div class="stat-icon">✓</div>
+  </div>
+  <div class="stat-card cash">
+    <div>
+      <div class="stat-label">Выручка сегодня</div>
+      <div class="stat-value" id="statRevenue">0 ₽</div>
+    </div>
+    <div class="stat-icon">₽</div>
+  </div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-filter="all">Все заказы <span class="count" id="cAll">0</span></div>
+  <div class="tab" data-filter="new">Новые <span class="count" id="cNew">0</span></div>
+  <div class="tab" data-filter="cooking">Готовятся <span class="count" id="cCook">0</span></div>
+  <div class="tab" data-filter="delivering">В пути <span class="count" id="cDel">0</span></div>
+  <div class="tab" data-filter="delivered">Доставлены <span class="count" id="cDone">0</span></div>
+</div>
+
+<div class="orders" id="orders"></div>
+
+<div class="demo-notice">ДЕМО · ПАНЕЛЬ СОТРУДНИКА</div>
+
+<script>
+const KEY = 'azimut_orders';
+let currentFilter = 'all';
+let knownOrderIds = new Set();
+let firstLoad = true;
+
+function loadOrders() {
+  try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+  catch { return []; }
+}
+function saveOrders(arr) { localStorage.setItem(KEY, JSON.stringify(arr)); }
+
+const STATUS_LABEL = {
+  new: 'Новый',
+  cooking: 'Готовится',
+  delivering: 'В доставке',
+  delivered: 'Доставлен',
+  cancelled: 'Отменён'
+};
+const PAY_LABEL = {
+  room: 'На счёт номера',
+  card_delivery: 'Карта при доставке',
+  cash: 'Наличные',
+  card_online: 'Карта онлайн (оплачено)'
+};
+
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return diff + ' сек назад';
+  if (diff < 3600) return Math.floor(diff / 60) + ' мин назад';
+  if (diff < 86400) return Math.floor(diff / 3600) + ' ч назад';
+  return new Date(ts).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+function nextStatus(s) {
+  return { new: 'cooking', cooking: 'delivering', delivering: 'delivered' }[s];
+}
+function nextStatusLabel(s) {
+  return {
+    new: 'Принять в работу',
+    cooking: 'Готов к доставке',
+    delivering: 'Доставлен'
+  }[s];
+}
+function nextStatusColor(s) {
+  return { new: 'next-orange', cooking: 'next-blue', delivering: 'next-green' }[s] || '';
+}
+
+function changeStatus(id, newStatus) {
+  const orders = loadOrders();
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  o.status = newStatus;
+  o.statusTs = Date.now();
+  saveOrders(orders);
+  render();
+}
+
+function cancelOrder(id) {
+  if (!confirm('Отменить заказ ' + id + '?')) return;
+  changeStatus(id, 'cancelled');
+}
+
+function renderOrder(o, isNew) {
+  const ts = new Date(o.ts).toLocaleString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const itemsHTML = o.items.map(i => `
+    <div class="order-item-row">
+      <div class="order-item-name">${i.name}</div>
+      <div class="order-item-qty">×${i.qty}</div>
+      <div class="order-item-price">${(i.price * i.qty).toLocaleString('ru')} ₽</div>
+    </div>
+  `).join('');
+
+  const commentHTML = o.comment
+    ? `<div class="order-comment"><div class="lbl">Комментарий гостя</div>${o.comment}</div>`
+    : '';
+
+  const flagsHTML = `
+    <div class="order-flags">
+      ${o.leaveInRoom ? '<span class="flag leave">⊕ Можно оставить в номере</span>' : ''}
+      ${o.payment === 'card_online' ? '<span class="flag online">⚡ Оплачено онлайн</span>' : ''}
+    </div>
+  `;
+
+  const next = nextStatus(o.status);
+  const actionsHTML = (o.status === 'delivered' || o.status === 'cancelled') ? '' : `
+    <div class="order-actions">
+      <button class="btn-action ${nextStatusColor(o.status)}" onclick="changeStatus('${o.id}','${next}')">
+        ${nextStatusLabel(o.status)} →
+      </button>
+      <button class="btn-action cancel" onclick="cancelOrder('${o.id}')">✕</button>
+    </div>
+  `;
+
+  const fbHTML = o.feedback ? `
+    <div class="order-fb">
+      <div class="fb-head">★ Отзыв гостя</div>
+      <div class="fb-ratings">
+        <span class="item">Еда: <strong>${o.feedback.food}/5</strong></span>
+        <span class="item">Скорость: <strong>${o.feedback.speed}/5</strong></span>
+        <span class="item">Вежливость: <strong>${o.feedback.courtesy}/5</strong></span>
+      </div>
+      ${o.feedback.comment ? `<div class="fb-comment">«${o.feedback.comment}»</div>` : ''}
+    </div>
+  ` : '';
+
+  return `
+    <div class="order-card ${isNew ? 'new' : ''}" data-id="${o.id}">
+      <div class="order-head">
+        <div class="order-id-block">
+          <div class="order-id">${o.id}</div>
+          <div class="order-ts">${ts} · ${timeAgo(o.ts)}</div>
+        </div>
+        <div class="status-pill ${o.status}">${STATUS_LABEL[o.status]}</div>
+      </div>
+
+      <div class="order-meta">
+        <div class="cell">
+          <div class="lbl">Комната</div>
+          <div class="val">№ ${o.room}</div>
+        </div>
+        <div class="cell">
+          <div class="lbl">Гостей · приборов</div>
+          <div class="val">${o.guests} ${o.guests === 1 ? 'персона' : (o.guests < 5 ? 'персоны' : 'персон')}</div>
+        </div>
+      </div>
+
+      <div class="order-items">${itemsHTML}</div>
+
+      ${commentHTML}
+      ${flagsHTML}
+
+      <div class="order-total">
+        <div class="lbl">Сумма заказа · ${PAY_LABEL[o.payment]}</div>
+        <div class="val">${o.total.toLocaleString('ru')} ₽</div>
+      </div>
+
+      ${actionsHTML}
+      ${fbHTML}
+    </div>
+  `;
+}
+
+function render() {
+  const orders = loadOrders();
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
+  // Stats
+  const counts = { new: 0, cooking: 0, delivering: 0, delivered: 0, cancelled: 0 };
+  let revenueToday = 0;
+  orders.forEach(o => {
+    counts[o.status] = (counts[o.status] || 0) + 1;
+    if (o.status === 'delivered' && o.ts >= today.getTime()) {
+      revenueToday += o.total;
+    }
+  });
+  document.getElementById('statNew').textContent = counts.new;
+  document.getElementById('statCook').textContent = counts.cooking + counts.delivering;
+  document.getElementById('statDone').textContent = counts.delivered;
+  document.getElementById('statRevenue').textContent = revenueToday.toLocaleString('ru') + ' ₽';
+
+  // Tab counts
+  document.getElementById('cAll').textContent = orders.length;
+  document.getElementById('cNew').textContent = counts.new;
+  document.getElementById('cCook').textContent = counts.cooking;
+  document.getElementById('cDel').textContent = counts.delivering;
+  document.getElementById('cDone').textContent = counts.delivered;
+
+  // Filter
+  let filtered = orders;
+  if (currentFilter !== 'all') filtered = orders.filter(o => o.status === currentFilter);
+
+  // Render list
+  const list = document.getElementById('orders');
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🍽</div>
+        <h3>Заказов пока нет</h3>
+        <p>Когда гость оформит заказ через бот, он мгновенно появится здесь.</p>
+        <div class="demo-controls">
+          <button class="demo-btn" onclick="addDemoOrder()">+ Добавить тестовый заказ</button>
+          <button class="demo-btn" onclick="clearAllOrders()">Очистить все</button>
+        </div>
+      </div>
+    `;
+    firstLoad = false;
+    return;
+  }
+
+  // Detect new orders for animation
+  list.innerHTML = filtered.map(o => {
+    const isNew = !firstLoad && !knownOrderIds.has(o.id) && o.status === 'new';
+    return renderOrder(o, isNew);
+  }).join('');
+
+  // Update known IDs
+  knownOrderIds = new Set(orders.map(o => o.id));
+  firstLoad = false;
+
+  // Play sound on new order (skip on first load)
+  if (!firstLoad && filtered.some(o => o.status === 'new' && !knownOrderIds.has(o.id))) {
+    playNotification();
+  }
+}
+
+// Audio notification (web audio API beep)
+function playNotification() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+  } catch (e) {}
+}
+
+// Demo controls
+function addDemoOrder() {
+  const sampleNames = [
+    [{name:'Карбонара', qty:1, price:890, dishId:'pa1'}, {name:'Цезарь с курицей', qty:1, price:650, dishId:'s1'}],
+    [{name:'Маргарита', qty:2, price:750, dishId:'p1'}, {name:'Кола / Спрайт', qty:2, price:280, dishId:'d6'}],
+    [{name:'Континентальный завтрак', qty:1, price:1300, dishId:'b1'}, {name:'Капучино', qty:1, price:320, dishId:'d2'}],
+  ];
+  const rooms = ['1207', '0815', '2104', '1502', '0606'];
+  const payments = ['room', 'card_delivery', 'card_online', 'cash'];
+  const items = sampleNames[Math.floor(Math.random() * sampleNames.length)];
+  const total = items.reduce((s,i) => s + i.price * i.qty, 0) + 200;
+  const order = {
+    id: '#' + Math.floor(100000 + Math.random() * 900000),
+    ts: Date.now(),
+    room: rooms[Math.floor(Math.random() * rooms.length)],
+    guests: Math.ceil(Math.random() * 3),
+    items: items,
+    comment: Math.random() > 0.6 ? 'Без лука, пожалуйста' : '',
+    payment: payments[Math.floor(Math.random() * payments.length)],
+    leaveInRoom: Math.random() > 0.7,
+    eta: 30 + Math.floor(Math.random() * 15),
+    total: total,
+    status: 'new',
+    feedback: null
+  };
+  const orders = loadOrders();
+  orders.unshift(order);
+  saveOrders(orders);
+  render();
+}
+
+function clearAllOrders() {
+  if (!confirm('Удалить все заказы безвозвратно?')) return;
+  localStorage.removeItem(KEY);
+  knownOrderIds.clear();
+  render();
+}
+
+// Listen for localStorage changes (other tabs/windows)
+window.addEventListener('storage', e => {
+  if (e.key === KEY) render();
+});
+
+// Tab clicks
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    currentFilter = t.dataset.filter;
+    render();
+  });
+});
+
+// Poll every 2 seconds (in case storage event doesn't fire — same-window updates)
+setInterval(render, 2000);
+
+// Initial render
+render();
+</script>
+</body>
+</html>
